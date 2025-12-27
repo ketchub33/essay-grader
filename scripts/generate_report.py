@@ -1,46 +1,57 @@
 import os
 import csv
-from src.grader import EssayGrader
+import sys
+
+# Добавляем корень проекта в пути поиска, чтобы видеть папку src
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from src.grader import EssayGrader
+except ImportError:
+    print("Ошибка: Не удалось найти модуль src. Проверьте структуру проекта.")
+    sys.exit(1)
 
 def main():
     grader = EssayGrader()
-    input_dir = 'data/essays_to_grade'
+    # Согласно твоему скриншоту, папка называется 'data'
+    input_dir = 'data'
     output_file = 'grading_report.csv'
     
-    # 1. Проверяем, существует ли папка, если нет - создаем
     if not os.path.exists(input_dir):
         os.makedirs(input_dir)
-        print(f"Created missing directory: {input_dir}")
 
-    # 2. Ищем файлы
+    # Получаем список всех .txt файлов в папке data
     files = [f for f in os.listdir(input_dir) if f.endswith('.txt')]
     
     if not files:
-        print("No .txt files found to grade! Creating a sample file...")
-        with open(os.path.join(input_dir, 'sample.txt'), 'w', encoding='utf-8') as f:
-            f.write("This is a sample text for grading. Artificial intelligence is evolving fast.")
-        files = ['sample.txt']
+        print(f"В папке {input_dir} нет .txt файлов. Создаю проверочный файл.")
+        with open(os.path.join(input_dir, 'hello.txt'), 'w', encoding='utf-8') as f:
+            f.write("Artificial intelligence is a great technology for the future.")
+        files = ['hello.txt']
 
-    # 3. Оцениваем
     results = []
     for filename in files:
-        path = os.path.join(input_dir, filename)
-        with open(path, 'r', encoding='utf-8') as f:
-            text = f.read()
-            report = grader.grade(text)
-            results.append({
-                'filename': filename,
-                'score': report['final_score'],
-                'verdict': report['verdict']
-            })
+        try:
+            with open(os.path.join(input_dir, filename), 'r', encoding='utf-8') as f:
+                text = f.read()
+                # Вызываем метод grade из твоего класса
+                report = grader.grade(text)
+                results.append({
+                    'filename': filename,
+                    'score': report.get('final_score', 0),
+                    'verdict': report.get('verdict', 'N/A')
+                })
+        except Exception as e:
+            print(f"Не удалось обработать файл {filename}: {e}")
 
-    # 4. Пишем отчет
+    # Записываем результат в CSV
     with open(output_file, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=['filename', 'score', 'verdict'])
+        fieldnames = ['filename', 'score', 'verdict']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(results)
     
-    print(f"Successfully generated {output_file} for {len(files)} files.")
+    print(f"Отчет успешно создан! Обработано файлов: {len(files)}")
 
 if __name__ == "__main__":
     main()

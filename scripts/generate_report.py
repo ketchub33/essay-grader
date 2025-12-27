@@ -4,34 +4,43 @@ from src.grader import EssayGrader
 
 def main():
     grader = EssayGrader()
-    data_path = "data/essays_to_grade"
-    os.makedirs(data_path, exist_ok=True)
+    input_dir = 'data/essays_to_grade'
+    output_file = 'grading_report.csv'
     
-    if not os.listdir(data_path):
-        with open(f"{data_path}/test_student.txt", "w") as f:
-            f.write("Artificial Intelligence is important for future development.")
+    # 1. Проверяем, существует ли папка, если нет - создаем
+    if not os.path.exists(input_dir):
+        os.makedirs(input_dir)
+        print(f"Created missing directory: {input_dir}")
 
-    report_data = []
-    print(f"Scanning {data_path}...")
+    # 2. Ищем файлы
+    files = [f for f in os.listdir(input_dir) if f.endswith('.txt')]
+    
+    if not files:
+        print("No .txt files found to grade! Creating a sample file...")
+        with open(os.path.join(input_dir, 'sample.txt'), 'w', encoding='utf-8') as f:
+            f.write("This is a sample text for grading. Artificial intelligence is evolving fast.")
+        files = ['sample.txt']
 
-    for filename in os.listdir(data_path):
-        if filename.endswith(".txt"):
-            with open(os.path.join(data_path, filename), "r") as f:
-                res = grader.grade(f.read())
-                report_data.append({
-                    "file": filename,
-                    "score": res["final_score"],
-                    "verdict": res["verdict"],
-                    "words": res["metrics"]["word_count"]
-                })
+    # 3. Оцениваем
+    results = []
+    for filename in files:
+        path = os.path.join(input_dir, filename)
+        with open(path, 'r', encoding='utf-8') as f:
+            text = f.read()
+            report = grader.grade(text)
+            results.append({
+                'filename': filename,
+                'score': report['final_score'],
+                'verdict': report['verdict']
+            })
 
-    output_file = "grading_report.csv"
-    with open(output_file, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["file", "score", "verdict", "words"])
+    # 4. Пишем отчет
+    with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=['filename', 'score', 'verdict'])
         writer.writeheader()
-        writer.writerows(report_data)
+        writer.writerows(results)
     
-    print(f"Report saved to {output_file}")
+    print(f"Successfully generated {output_file} for {len(files)} files.")
 
 if __name__ == "__main__":
     main()

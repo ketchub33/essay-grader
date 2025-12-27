@@ -4,29 +4,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  grade:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-          
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           python -m textblob.download_corpora
-          
-      - name: Run Report
+
+      - name: Run grading
         run: |
-          # Это САМАЯ важная строка для фикса ошибки импорта
-          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          # Принудительно задаем корень проекта для Python
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           python scripts/generate_report.py
-          
-      - name: Upload result
+
+      - name: Upload Report
         uses: actions/upload-artifact@v3
         with:
-          name: grading-results
+          name: essay-grades
+          # Файл появится в корне после работы скрипта
           path: grading_report.csv

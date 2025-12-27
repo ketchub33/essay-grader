@@ -1,0 +1,27 @@
+name: Generate Grading Report
+
+on:
+  workflow_dispatch: # Позволяет запускать кнопку вручную
+  schedule:
+    - cron: '0 12 * * 5' # Запуск каждую пятницу в 12:00
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          python -m textblob.download_corpora
+      - name: Generate Report
+        run: python scripts/generate_report.py
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-grading-report
+          path: grading_report.csv

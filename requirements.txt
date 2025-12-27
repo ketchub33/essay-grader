@@ -1,0 +1,5 @@
+textblob>=0.17.1
+nltk>=3.7
+pytest>=7.0.0
+flake8>=4.0.0
+pymorphy3>=1.2.0

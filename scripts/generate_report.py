@@ -2,26 +2,30 @@ import os
 import csv
 import sys
 
+# Магия для GitHub: принудительно добавляем корень проекта в пути поиска
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_root)
-
-from src.grader import EssayGrader
+try:
+    from src.grader import EssayGrader
+except ImportError as e:
+    print(f"Критическая ошибка импорта: {e}")
+    print(f"Текущий путь поиска: {sys.path}")
+    sys.exit(1)
 
 def main():
     grader = EssayGrader()
-    input_dir = os.path.join(project_root, 'data')
-    output_file = os.path.join(project_root, 'grading_report.csv')
+    # На твоем скриншоте папка называется 'data'
+    input_dir = os.path.join(BASE_DIR, 'data')
+    output_file = os.path.join(BASE_DIR, 'grading_report.csv')
     
-
     os.makedirs(input_dir, exist_ok=True)
-
     files = [f for f in os.listdir(input_dir) if f.endswith('.txt')]
     
     if not files:
-        print("Нет файлов для проверки. Создаю тестовый файл...")
+        # Если папка пуста, создаем файл, чтобы Action не упал
         with open(os.path.join(input_dir, 'test.txt'), 'w', encoding='utf-8') as f:
-            f.write("Artificial intelligence is changing the world of education.")
+            f.write("AI is transforming education by providing instant feedback.")
         files = ['test.txt']
 
     results = []
@@ -31,20 +35,18 @@ def main():
                 text = f.read()
                 report = grader.grade(text)
                 results.append({
-                    'filename': filename,
-                    'score': report.get('final_score', 0),
+                    'filename': filename, 
+                    'score': report.get('final_score', 0), 
                     'verdict': report.get('verdict', 'N/A')
                 })
         except Exception as e:
             print(f"Ошибка в файле {filename}: {e}")
 
-
     with open(output_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=['filename', 'score', 'verdict'])
         writer.writeheader()
         writer.writerows(results)
-    
-    print(f"Отчет готов! Обработано файлов: {len(files)}")
+    print("Отчет успешно создан!")
 
 if __name__ == "__main__":
     main()

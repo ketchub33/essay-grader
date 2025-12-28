@@ -23,7 +23,8 @@ jobs:
           export PYTHONPATH="${PYTHONPATH}:$(pwd)"
           python scripts/generate_report.py
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # МЕНЯЕМ v3 НА v4
         with:
           name: results
           path: grading_report.csv
+          overwrite: true # Чтобы не было конфликтов при повторном запуске

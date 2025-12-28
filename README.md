@@ -1,7 +1,6 @@
 # 🎓 Automated Essay Grading System
 
-![Tests Status](https://github.com/ketchub33/essay-grader/workflows/Code%20Quality%20&%20Tests/badge.svg)
-![Report Generator](https://github.com/YOUR_USERNAME/essay-grader/workflows/Generate%20Grading%20Report/badge.svg)
+
 
 ## 🤖 О проекте
 Это полностью автоматизированная система оценки эссе. Проект демонстрирует **DevOps-подход**: код не только оценивает текст локально, но и автоматически генерирует отчеты в облаке (GitHub Actions) без участия человека.

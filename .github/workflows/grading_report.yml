@@ -7,28 +7,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          # Проверяем наличие requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           python -m textblob.download_corpora
-
       - name: Run grading
         run: |
-          # Принудительно задаем корень проекта для Python
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          # Добавляем текущую папку в пути поиска модулей
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
           python scripts/generate_report.py
-
-      - name: Upload Report
+      - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: essay-grades
-          # Файл появится в корне после работы скрипта
+          name: results
           path: grading_report.csv
